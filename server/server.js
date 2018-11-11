@@ -1,16 +1,20 @@
-const { graphqlExpress, graphqlExpress } = require('apollo-server-express');
+const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
 const {makeExecutableSchema} = require('graphql-tools');
-
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const express = require('express');
 const expressJwt = require('express-jwt');
+const fs = require('fs');
+
 const jwt = require('jsonwebtoken');
 const db = require('./db');
 
-const port = 9000;
+const port = 8080;
 const jwtSecret = Buffer.from('Zn8Q5tyZ/G1MHltc4F/gTkVJMlrbKiZt', 'base64');
+const typeDefs = fs.readFileSync('./schema.graphql', {encoding:'utf-8'});
+const resolvers = require('./resolver')
 
+const schema = makeExecutableSchema({typeDefs,resolvers});
 const app = express();
 app.use(cors(), bodyParser.json(), expressJwt({
   secret: jwtSecret,
@@ -18,7 +22,7 @@ app.use(cors(), bodyParser.json(), expressJwt({
 }));
 
 app.use('/graphql', graphqlExpress({schema}));
-app.use('/graphiql',graphqlExpress({endpointURL:'/graphql'}))
+app.use('/graphiql',graphiqlExpress({endpointURL:'/graphql'}))
 app.post('/login', (req, res) => {
   const {email, password} = req.body;
   const user = db.users.list().find((user) => user.email === email);

@@ -1,3 +1,6 @@
+const { graphqlExpress, graphqlExpress } = require('apollo-server-express');
+const {makeExecutableSchema} = require('graphql-tools');
+
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const express = require('express');
@@ -14,6 +17,8 @@ app.use(cors(), bodyParser.json(), expressJwt({
   credentialsRequired: false
 }));
 
+app.use('/graphql', graphqlExpress({schema}));
+app.use('/graphiql',graphqlExpress({endpointURL:'/graphql'}))
 app.post('/login', (req, res) => {
   const {email, password} = req.body;
   const user = db.users.list().find((user) => user.email === email);
